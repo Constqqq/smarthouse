@@ -5,6 +5,7 @@ import { HomeKitButton } from "@/components/HomeKitButton"
 
 function Toggle({ isOn, onToggle }: { isOn: boolean; onToggle: () => void }) {
   return (
+    
     <button
       onClick={onToggle}
       className={`
@@ -29,8 +30,9 @@ export default function LightingPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-2xl space-y-8">
-      <div className="flex items-center gap-4">
+    <main className="flex flex-col justify-between items-center min-h-screen">
+      {/* Контейнер с кнопками */}
+      <div className="flex gap-6 h-16 items-center">
         <HomeKitButton label="Дом" href="/">
           <span className="text-2xl">🏠</span>
         </HomeKitButton>
@@ -39,20 +41,24 @@ export default function LightingPage() {
         </HomeKitButton>
       </div>
 
-      <div className="grid gap-4">
-        {rooms.map((room) => (
-          <div key={room.id} className="p-4 bg-white/90 backdrop-blur-md rounded-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-medium">{room.name}</h3>
-                <p className="text-sm text-gray-500">{room.isOn ? "On" : "Off"}</p>
+      {/* Основной контент */}
+      <div className="container mx-auto max-w-2xl space-y-8">
+        <div className="grid gap-4">
+          {rooms.map((room) => (
+            <div key={room.id} className="p-4 bg-white/90 backdrop-blur-md rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">{room.name}</h3>
+                  <p className="text-sm text-gray-500">{room.isOn ? "On" : "Off"}</p>
+                </div>
+                <Toggle isOn={room.isOn} onToggle={() => toggleLight(room.id)} />
               </div>
-              <Toggle isOn={room.isOn} onToggle={() => toggleLight(room.id)} />
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
+    </main>
   )
 }
+
 

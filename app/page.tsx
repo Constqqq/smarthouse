@@ -2,7 +2,7 @@ import { HomeKitButton } from "@/components/HomeKitButton"
 
 export default function HomePage() {
   return (
-    <main className="container mx-auto max-w-2xl">
+    <main className="flex flex-col items-center  min-h-screen ">
       <h1 className="text-2xl font-semibold text-white mb-8">Мой дом</h1>
 
       <div className="flex gap-6">
@@ -22,4 +22,6 @@ export default function HomePage() {
     </main>
   )
 }
+
+
 

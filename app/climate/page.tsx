@@ -1,17 +1,49 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { HomeKitButton } from "@/components/HomeKitButton"
 
+const THINGSBOARD_SERVER = "http://localhost:8080" // Адрес ThingsBoard
+const DEVICE_ID = "8c9244a0-f821-11ef-9e51-0b17572f43f6" // ID устройства в ThingsBoard
+const ACCESS_TOKEN = "5Hc4jIDwD6P67viK69pH" // Токен доступа
+
 export default function ClimatePage() {
-  const [temperature, setTemperature] = useState(24.0)
-  const increaseTemperature = () => {
-    setTemperature((prev) => Math.min(35, +(prev + 0.5).toFixed(1)))
+  const [temperature, setTemperature] = useState<number>(24.0)
+
+  // Получение температуры с ThingsBoard
+  useEffect(() => {
+    const fetchTemperature = async () => {
+      try {
+        const response = await fetch(
+          `${THINGSBOARD_SERVER}/api/plugins/telemetry/${DEVICE_ID}/values/timeseries?keys=temperature`,
+          { headers: { "X-Authorization": `Bearer ${ACCESS_TOKEN}` } }
+        )
+        const data = await response.json()
+        if (data.temperature) {
+          setTemperature(parseFloat(data.temperature[0].value))
+        }
+      } catch (error) {
+        console.error("Ошибка при получении температуры:", error)
+      }
+    }
+
+    fetchTemperature()
+  }, [])
+
+  // Отправка температуры в ThingsBoard
+  const updateTemperature = async (newTemp: number) => {
+    try {
+      setTemperature(newTemp) // Обновляем UI сразу
+      await fetch(`${THINGSBOARD_SERVER}/api/v1/${ACCESS_TOKEN}/telemetry`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ temperature: newTemp }),
+      })
+    } catch (error) {
+      console.error("Ошибка при отправке температуры:", error)
+    }
   }
 
-  const decreaseTemperature = () => {
-    setTemperature((prev) => Math.max(16, +(prev - 0.5).toFixed(1)))
-  }
   return (
     <div className="container mx-auto max-w-2xl space-y-8">
       <div className="flex items-center gap-4">
@@ -28,15 +60,15 @@ export default function ClimatePage() {
           <h2 className="text-lg font-medium">Гостинная</h2>
           <div className="text-5xl font-semibold">{temperature}°</div>
           <div className="flex justify-center gap-4">
-          <button
-              onClick={decreaseTemperature}
+            <button
+              onClick={() => updateTemperature(Math.max(16, +(temperature - 0.5).toFixed(1)))}
               className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-2xl"
               disabled={temperature <= 16}
             >
               -
             </button>
             <button
-              onClick={increaseTemperature}
+              onClick={() => updateTemperature(Math.min(35, +(temperature + 0.5).toFixed(1)))}
               className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-2xl"
               disabled={temperature >= 35}
             >
@@ -48,4 +80,3 @@ export default function ClimatePage() {
     </div>
   )
 }
-
